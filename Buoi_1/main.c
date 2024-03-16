@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     int status[256];
     char dir[256] = {0};
 
-    if (argc < 2)
+    if (argc < 3)
     {
         init_options(&options);
         parse_flags(argv, argc, &options);
@@ -102,6 +102,10 @@ int main(int argc, char *argv[])
     }
     else
     {
+        init_options(&options);
+        parse_flags(argv, argc, &options);
+        memset(&widths, 0, sizeof(widths_t)); // initialize all value with 0
+        widths.window_width = get_window_width();
         for (int i = 1; i < argc; ++i)
         {
             if ((argv[i][0] == '/') || (argv[i][0] == '.')) // is not argument
