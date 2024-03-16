@@ -14,6 +14,8 @@ SHARED_DIR := lib/shared/
 
 .PHONY:build clean main_run static static_link shared shared_link static_run shared_run
 
+sources := $(wildcard $(SRC_DIR)/*.c)
+
 obj/main.o: main.c 
 	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
 	

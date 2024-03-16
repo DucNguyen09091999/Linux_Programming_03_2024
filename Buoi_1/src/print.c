@@ -78,12 +78,12 @@ static void print_list(file_info *files, int count, options_t *options, widths_t
     {
 
         if (options->show_inode)
-            printf("%*d ", widths->inode_width, files[i].st_ino);
+            printf("%*ld ", widths->inode_width, files[i].st_ino);
 
         if (options->ll_settings.show_extra_data)
         {
             printf("%s ", files[i].permission);
-            printf("%*d ", widths->nlink_width, files[i].st_nlink);
+            printf("%*ld ", widths->nlink_width, files[i].st_nlink);
 
             if (options->ll_settings.show_owner)
             {
@@ -108,7 +108,7 @@ static void print_list(file_info *files, int count, options_t *options, widths_t
                 printf("%*s ", widths->size_width, devices);
             }
             else
-                printf("%*d ", widths->size_width, files[i].st_size);
+                printf("%*ld ", widths->size_width, files[i].st_size);
 
             char filetime[14];
             struct tm *timeinfo;
@@ -236,7 +236,7 @@ print_tabular(file_info *files, int file_count, options_t *options, widths_t *wi
             int file_idx = i + j * nrows;
 
             if (options->show_inode)
-                printf("%*d ", widths->inode_width, files[file_idx].st_ino);
+                printf("%*ld ", widths->inode_width, files[file_idx].st_ino);
 
             print_padded_name(files[file_idx], options, column_configs[ncols - 1].max_len[j]);
             if (j < ncols - 1)

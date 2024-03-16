@@ -77,31 +77,43 @@ int get_file_data_from_dir(char *directory, file_info *files, options_t *options
     return i;
 }
 
+
 int main(int argc, char *argv[])
 {
 
     file_info files[256]; // For now static array
-
     widths_t widths;
-    memset(&widths, 0, sizeof(widths_t)); // initialize all value with 0
-    widths.window_width = get_window_width();
-
-    char dir[256] = {0};
-    for (int i = 1; i < argc; ++i)
-        if (argv[i][0] != '-') // is not argument
-            strcpy(dir, argv[i]);
-
     options_t options;
+    int num_of_files;
+    int status[256];
+    char dir[256] = {0};
+
+
     init_options(&options);
     parse_flags(argv, argc, &options);
 
-    if (!dir[0])
-        dir[0] = '.';
+    for (int i = 1; i < argc; ++i)
+    {
+        memset(&widths, 0, sizeof(widths_t)); // initialize all value with 0
+        widths.window_width = get_window_width();
+        widths.total_blocks = 0;
+        
+        if ((argv[i][0] == '/') || (argv[i][0] == '.')) // is not argument
+        {
+            printf("%s:\n",argv[i]);
+            strcpy(dir, argv[i]);
+            
+                    if (!dir[0])
+            dir[0] = '.';
 
-    int num_of_files = get_file_data_from_dir(dir, files, &options, &widths);
-    sort(files, num_of_files, &options);
+            num_of_files = get_file_data_from_dir(dir, files, &options, &widths);
+            sort(files, num_of_files, &options);
 
-    print_ls(files, num_of_files, &options, &widths);
+            print_ls(files, num_of_files, &options, &widths);
+            printf("\n");
+        }
+        
+    }
 
     return 0;
 }
