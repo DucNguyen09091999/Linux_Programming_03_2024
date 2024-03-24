@@ -36,13 +36,20 @@ status_t CloseFile(FileHandler *file)
 status_t WriteToFile(FileHandler *file, const char *content)
 {
     ssize_t WriteNum;
+    off_t offset;
+    /*Seek to end of file to write*/
+    offset = lseek(file->fd, 0, SEEK_END);
+    if (offset == -1)
+    {
+        perror("lseek");
+        return E_FAILED;
+    } 
     WriteNum = write(file->fd, content, strlen(content));
     if (WriteNum < 0)
     {
         perror("write");
         return E_FAILED;
     }
-    // printf("Write %ld - %s to file\n", WriteNum, content);
     return E_SUCCESS; 
 }
 
@@ -50,6 +57,14 @@ status_t ReadFromFile(FileHandler *file)
 {
     ssize_t ReadNum;
     char buffer[512];
+    off_t offset;
+    /*Seek to head file to read*/
+    offset = lseek(file->fd, 0, SEEK_SET);
+    if (offset == -1)
+    {
+        perror("lseek");
+        return E_FAILED;
+    }
     ReadNum = read(file->fd, buffer, sizeof(buffer));
     if (ReadNum <= 0)
     {
@@ -57,7 +72,7 @@ status_t ReadFromFile(FileHandler *file)
         return E_FAILED;
     }
     buffer[ReadNum] = '\0';
-    printf("Read %ld bytes: %s\n", ReadNum, buffer);
+    printf("Read: %s\n",buffer);
     return E_SUCCESS;
 }
 
@@ -67,12 +82,27 @@ status_t LogOperation(const char *operation, status_t t_status)
     return t_status;
 }
 
+off_t getCurrentOffset(FileHandler *file)
+{
+    off_t offset = lseek(file->fd, 0, SEEK_CUR); // Lấy vị trí hiện tại của con trỏ tập tin
+    if (offset == -1)
+    {
+        perror("lseek");
+    }
+    else
+    {
+        // printf("Current offset: %ld\n", offset);
+    }
+    return offset;
+}
+
 struct OpsType {
     status_t (*pOpenFile)(FileHandler *file, const char *filename, const int mode);
     status_t (*pCloseFile)(FileHandler *file);
     status_t (*pReadFile)(FileHandler *file);
     status_t (*pWriteFile)(FileHandler *file, const char *content);
     status_t (*pLog)( const char *operation, status_t t_status);
+    off_t (*pGetCurrentOffset)(FileHandler *file);
 };
 
 
@@ -82,6 +112,7 @@ const struct OpsType File_Operations = {
     .pCloseFile = CloseFile,
     .pReadFile = ReadFromFile,
     .pWriteFile = WriteToFile,
+    .pGetCurrentOffset = getCurrentOffset,
     .pLog = LogOperation,
 };
 
@@ -96,22 +127,26 @@ int main(int argc, char *argv[])
     FileHandler file;
     struct OpsType Rw_Ops;
     status_t t_status;
-
+    off_t offset = 0;
     Rw_Ops.pOpenFile = OpenFile;
     Rw_Ops.pCloseFile = CloseFile;
     Rw_Ops.pReadFile = ReadFromFile;
     Rw_Ops.pWriteFile =  WriteToFile;
+    Rw_Ops.pGetCurrentOffset = getCurrentOffset;
     Rw_Ops.pLog = LogOperation;
 
 
     t_status = Rw_Ops.pOpenFile(&file, argv[1], 0667);
     if (Rw_Ops.pLog("Open", t_status) == E_SUCCESS)
     {
+        offset= Rw_Ops.pGetCurrentOffset(&file);
         t_status = Rw_Ops.pWriteFile(&file, "tao la duc day\n");
         if (Rw_Ops.pLog("Write", t_status) == E_SUCCESS)
         {
+            offset= Rw_Ops.pGetCurrentOffset(&file);
             t_status = Rw_Ops.pReadFile(&file);
             Rw_Ops.pLog("Read", t_status);
+
         }
     }
     Rw_Ops.pLog( "Close", Rw_Ops.pCloseFile(&file));
