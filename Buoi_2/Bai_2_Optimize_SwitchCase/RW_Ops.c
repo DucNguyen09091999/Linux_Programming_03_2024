@@ -40,13 +40,7 @@ void RemoveLine(FileHandler *file, const char *filename, int lineNumber);
 status_t RemoveOneLineInFile(FileHandler *file, const char *filename, int lineNumber);
 status_t LogOperation(const char *operation, status_t t_status);
 off_t GetCurrentOffset(FileHandler *file);
-void SelectFile(FileHandler *file, size_t bufsize);
-void FreeFile(FileHandler *file);
-void WriteDataToFile(FileHandler *file, size_t bufsize);
-void ReadDataFromFile(FileHandler *file);
-void GetCurrentOffsetOfFile(FileHandler *file);
-void DeleteLineFromFile(FileHandler *file);
-void Print_Menu();
+
 
 // Definition of the OpsType structure
 const struct OpsType File_Operations = {
