@@ -148,23 +148,32 @@ void Print_Menu()
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
-        return 1;
-    }
+    // if (argc != 2)
+    // {
+    //     fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+    //     return 1;
+    // }
 
     FileHandler file;
     struct OpsType Rw_Ops;
     status_t t_status;
     off_t offset = 0;
     int option;
+    char *filename = NULL;
+    size_t bufsize = 100;
+    size_t filesize;
+    int c;
+    char *dataFromUser = NULL;
+    size_t datasize;
     Rw_Ops.pOpenFile = OpenFile;
     Rw_Ops.pCloseFile = CloseFile;
     Rw_Ops.pReadFile = ReadFromFile;
     Rw_Ops.pWriteFile =  WriteToFile;
     Rw_Ops.pGetCurrentOffset = getCurrentOffset;
     Rw_Ops.pLog = LogOperation;
+
+
+
     Print_Menu();
     while (1)
     {
@@ -173,16 +182,46 @@ int main(int argc, char *argv[])
         switch (option)
         {
         case 1:
-            t_status = Rw_Ops.pOpenFile(&file, argv[1], 0667);
+                filename = (char*)malloc(bufsize*sizeof(char));
+                if (filename == NULL)
+                {
+                    fprintf(stderr, "Memory allocation error\n");
+                    exit(EXIT_FAILURE);
+                }
+                printf("Please enter you file name: ");
+            // Clear the input buffer to avoid any unexpected behavior because scanf is using before, so the size of string is not 100-bufsize, it is the value which is the integer value previously entered
+            /*Using loop to clear input buffer by reading all characteristic from stdin until it reaches newline char or EOF*/
+            while ((c = getchar()) != '\n' && c != EOF);
+            filesize = getline(&filename, &bufsize, stdin);
+            if (filename[filesize - 1] == '\n') {
+                filename[filesize - 1] = '\0';
+            }
+            t_status = Rw_Ops.pOpenFile(&file, filename, 0667);
             Rw_Ops.pLog("Open", t_status);
+            free(filename);
             break;
         case 2:
             t_status = Rw_Ops.pCloseFile(&file);
             Rw_Ops.pLog( "Close", t_status);
             break;
         case 3:
-            t_status = Rw_Ops.pWriteFile(&file, "tao la duc day\n");
+            dataFromUser = (char*)malloc(bufsize*sizeof(char));
+            if (dataFromUser == NULL)
+            {
+                fprintf(stderr, "Memory allocation error\n");
+                exit(EXIT_FAILURE);
+            }
+            printf("Please enter you file name: ");
+            // Clear the input buffer to avoid any unexpected behavior because scanf is using before, so the size of string is not 100-bufsize, it is the value which is the integer value previously entered
+            /*Using loop to clear input buffer by reading all characteristic from stdin until it reaches newline char or EOF*/
+            while ((c = getchar()) != '\n' && c != EOF);
+            datasize = getline(&dataFromUser, &bufsize, stdin);
+            if (dataFromUser[datasize - 1] == '\n') {
+                dataFromUser[datasize - 1] = '\0';
+            }
+            t_status = Rw_Ops.pWriteFile(&file, dataFromUser);
             Rw_Ops.pLog("Write", t_status);
+            free(dataFromUser);
             break;
         case 4:
             t_status = Rw_Ops.pReadFile(&file);
