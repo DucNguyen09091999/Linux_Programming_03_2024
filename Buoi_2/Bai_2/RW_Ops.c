@@ -18,11 +18,23 @@ typedef struct
 
 status_t OpenFile(FileHandler *file, const char *filename, const int mode)
 {
-    file->fd = open(filename, O_CREAT | O_TRUNC | O_RDWR, mode);
-    if (file->fd == -1)
+    if (access(filename, F_OK) == -1) {
+        // If file is not exist, create a file
+        file->fd = open(filename, O_RDWR | O_CREAT, mode);
+        if (file->fd == -1)
+        {
+            perror("open");
+            return E_FAILED;
+        }
+    }
+    else
     {
-        perror("open");
-        return E_FAILED;
+        // If file is existed, open file
+        file->fd = open(filename, O_RDWR, mode);
+        if (file->fd == -1) {
+            perror("open");
+            return E_FAILED;
+        }
     }
     return E_SUCCESS;
 }
@@ -116,6 +128,24 @@ const struct OpsType File_Operations = {
     .pLog = LogOperation,
 };
 
+void Print_Menu()
+{
+    printf("============================== Welcome to file operation ===============================\n");
+    printf("========================================================================================\n");
+    printf("============================== Please Enter your Option  ===============================\n");
+    printf("==-------------- Option ------------------||--------------- Feature ------------------==\n");
+    printf("========================================================================================\n");
+    printf("== 1. Open                                ||  Open the file                           ==\n");
+    printf("== 2. Close                               ||  Close the file                          ==\n");
+    printf("== 3. Write to file                       ||  Write data to file                      ==\n");
+    printf("== 4. Read from file                      ||  Read data from file                     ==\n");
+    printf("== 5. Get the current offset              ||  Get the current offset                  ==\n");
+    printf("== 6. Exit program                        ||  Exit program                            ==\n");
+    printf("========================================================================================\n");
+    printf("========================================================================================\n");
+
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 2)
@@ -128,28 +158,64 @@ int main(int argc, char *argv[])
     struct OpsType Rw_Ops;
     status_t t_status;
     off_t offset = 0;
+    int option;
     Rw_Ops.pOpenFile = OpenFile;
     Rw_Ops.pCloseFile = CloseFile;
     Rw_Ops.pReadFile = ReadFromFile;
     Rw_Ops.pWriteFile =  WriteToFile;
     Rw_Ops.pGetCurrentOffset = getCurrentOffset;
     Rw_Ops.pLog = LogOperation;
-
-
-    t_status = Rw_Ops.pOpenFile(&file, argv[1], 0667);
-    if (Rw_Ops.pLog("Open", t_status) == E_SUCCESS)
+    Print_Menu();
+    while (1)
     {
-        offset= Rw_Ops.pGetCurrentOffset(&file);
-        t_status = Rw_Ops.pWriteFile(&file, "tao la duc day\n");
-        if (Rw_Ops.pLog("Write", t_status) == E_SUCCESS)
+        printf("Please enter your choice: ");
+        scanf("%d", &option);
+        switch (option)
         {
-            offset= Rw_Ops.pGetCurrentOffset(&file);
+        case 1:
+            t_status = Rw_Ops.pOpenFile(&file, argv[1], 0667);
+            Rw_Ops.pLog("Open", t_status);
+            break;
+        case 2:
+            t_status = Rw_Ops.pCloseFile(&file);
+            Rw_Ops.pLog( "Close", t_status);
+            break;
+        case 3:
+            t_status = Rw_Ops.pWriteFile(&file, "tao la duc day\n");
+            Rw_Ops.pLog("Write", t_status);
+            break;
+        case 4:
             t_status = Rw_Ops.pReadFile(&file);
             Rw_Ops.pLog("Read", t_status);
-
+            break;
+        case 5:
+            offset= Rw_Ops.pGetCurrentOffset(&file);
+            printf("Current offset is %ld\n",offset);
+            break;
+        case 6:
+            return 0;
+            break;
+        default:
+            printf("Invalid option\n");
+            break;
         }
     }
-    Rw_Ops.pLog( "Close", Rw_Ops.pCloseFile(&file));
+    
+
+    // t_status = Rw_Ops.pOpenFile(&file, argv[1], 0667);
+    // if (Rw_Ops.pLog("Open", t_status) == E_SUCCESS)
+    // {
+    //     offset= Rw_Ops.pGetCurrentOffset(&file);
+    //     t_status = Rw_Ops.pWriteFile(&file, "tao la duc day\n");
+    //     if (Rw_Ops.pLog("Write", t_status) == E_SUCCESS)
+    //     {
+    //         offset= Rw_Ops.pGetCurrentOffset(&file);
+    //         t_status = Rw_Ops.pReadFile(&file);
+    //         Rw_Ops.pLog("Read", t_status);
+
+    //     }
+    // }
+    // Rw_Ops.pLog( "Close", Rw_Ops.pCloseFile(&file));
 
     return 0;
 }
