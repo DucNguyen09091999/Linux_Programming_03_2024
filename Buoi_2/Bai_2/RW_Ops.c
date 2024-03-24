@@ -14,13 +14,14 @@ typedef int32_t status_t;
 typedef struct
 {
     int fd;
+    char *filename;
 } FileHandler;
 
-status_t OpenFile(FileHandler *file, const char *filename, const int mode)
+status_t OpenFile(FileHandler *file, const int mode)
 {
-    if (access(filename, F_OK) == -1) {
+    if (access(file->filename, F_OK) == -1) {
         // If file is not exist, create a file
-        file->fd = open(filename, O_RDWR | O_CREAT, mode);
+        file->fd = open(file->filename, O_RDWR | O_CREAT, mode);
         if (file->fd == -1)
         {
             perror("open");
@@ -30,7 +31,7 @@ status_t OpenFile(FileHandler *file, const char *filename, const int mode)
     else
     {
         // If file is existed, open file
-        file->fd = open(filename, O_RDWR, mode);
+        file->fd = open(file->filename, O_RDWR, mode);
         if (file->fd == -1) {
             perror("open");
             return E_FAILED;
@@ -165,12 +166,6 @@ static void RemoveLine(FileHandler *file, const char *filename, int lineNumber)
         return;
     }
 
-    // Mở lại tệp gốc
-    file->fd = open(filename, O_RDWR, 0666);
-    if (file->fd == -1) {
-        perror("open");
-        return;
-    }
 }
 
 status_t RemoveOneLineInFile(FileHandler *file, const char *filename, int lineNumber)
@@ -206,7 +201,7 @@ off_t GetCurrentOffset(FileHandler *file)
 }
 
 struct OpsType {
-    status_t (*pOpenFile)(FileHandler *file, const char *filename, const int mode);
+    status_t (*pOpenFile)(FileHandler *file, const int mode);
     status_t (*pCloseFile)(FileHandler *file);
     status_t (*pReadFile)(FileHandler *file);
     status_t (*pWriteFile)(FileHandler *file, const char *content);
@@ -234,8 +229,8 @@ void Print_Menu()
     printf("============================== Please Enter your Option  ===============================\n");
     printf("==-------------- Option ------------------||--------------- Feature ------------------==\n");
     printf("========================================================================================\n");
-    printf("== 1. Open                                ||  Open the file                           ==\n");
-    printf("== 2. Close                               ||  Close the file                          ==\n");
+    printf("== 1. Select a file                       ||  Select the file you want to work        ==\n");
+    printf("== 2. Free selected file                  ||  free file                               ==\n");
     printf("== 3. Write to file                       ||  Write data to file                      ==\n");
     printf("== 4. Read from file                      ||  Read data from file                     ==\n");
     printf("== 5. Get the current offset              ||  Get the current offset                  ==\n");
@@ -254,7 +249,6 @@ int main(int argc, char *argv[])
     status_t t_status;
     off_t offset = 0;
     int option;
-    char *filename = NULL;
     size_t bufsize = 100;
     size_t filesize;
     int c;
@@ -280,8 +274,8 @@ int main(int argc, char *argv[])
         switch (option)
         {
             case 1:
-                    filename = (char*)malloc(bufsize*sizeof(char));
-                    if (filename == NULL)
+                    file.filename = (char*)malloc(bufsize*sizeof(char));
+                    if (file.filename == NULL)
                     {
                         fprintf(stderr, "Memory allocation error\n");
                         exit(EXIT_FAILURE);
@@ -290,19 +284,17 @@ int main(int argc, char *argv[])
                 // Clear the input buffer to avoid any unexpected behavior because scanf is using before, so the size of string is not 100-bufsize, it is the value which is the integer value previously entered
                 /*Using loop to clear input buffer by reading all characteristic from stdin until it reaches newline char or EOF*/
                 while ((c = getchar()) != '\n' && c != EOF);
-                filesize = getline(&filename, &bufsize, stdin);
-                if (filename[filesize - 1] == '\n') {
-                    filename[filesize - 1] = '\0';
+                filesize = getline(&file.filename, &bufsize, stdin);
+                if (file.filename[filesize - 1] == '\n') {
+                    file.filename[filesize - 1] = '\0';
                 }
-                t_status = Rw_Ops.pOpenFile(&file, filename, 0667);
-                Rw_Ops.pLog("Open", t_status);
                 break;
             case 2:
-                t_status = Rw_Ops.pCloseFile(&file);
-                Rw_Ops.pLog( "Close", t_status);
-                free(filename);
+                free(file.filename);
                 break;
             case 3:
+                t_status = Rw_Ops.pOpenFile(&file, 0667);
+                Rw_Ops.pLog("Open", t_status);
                 dataFromUser = (char*)malloc(bufsize*sizeof(char));
                 if (dataFromUser == NULL)
                 {
@@ -320,23 +312,38 @@ int main(int argc, char *argv[])
                 t_status = Rw_Ops.pWriteFile(&file, dataFromUser);
                 Rw_Ops.pLog("Write", t_status);
                 free(dataFromUser);
+                t_status = Rw_Ops.pCloseFile(&file);
+                Rw_Ops.pLog( "Close", t_status);
                 break;
             case 4:
+                t_status = Rw_Ops.pOpenFile(&file, 0667);
+                Rw_Ops.pLog("Open", t_status);
                 t_status = Rw_Ops.pReadFile(&file);
                 Rw_Ops.pLog("Read", t_status);
+                t_status = Rw_Ops.pCloseFile(&file);
+                Rw_Ops.pLog( "Close", t_status);
                 break;
             case 5:
+                t_status = Rw_Ops.pOpenFile(&file, 0667);
+                Rw_Ops.pLog("Open", t_status);
                 offset= Rw_Ops.pGetCurrentOffset(&file);
                 printf("Current offset is %ld\n",offset);
+                t_status = Rw_Ops.pCloseFile(&file);
+                Rw_Ops.pLog( "Close", t_status);
                 break;
             case 6:
+                t_status = Rw_Ops.pOpenFile(&file, 0667);
+                Rw_Ops.pLog("Open", t_status);
                 printf("Please enter the line you want to delete: ");
                 while ((c = getchar()) != '\n' && c != EOF);
                 scanf("%d",&lineNumber);
-                t_status = Rw_Ops.pRemoveOneLine(&file, filename, lineNumber);
+                t_status = Rw_Ops.pRemoveOneLine(&file, file.filename, lineNumber);
                 Rw_Ops.pLog("Remove a line in file ", t_status);
+                t_status = Rw_Ops.pOpenFile(&file, 0667);
+                Rw_Ops.pLog("Open", t_status);
                 break;
             case 7:
+                free(file.filename);
                 return 0;
                 break;
             default:
