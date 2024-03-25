@@ -4,7 +4,8 @@ SRC_DIR := src/
 CC := gcc
 OBJ_FILE := obj/main.o
 OBJ_FILE += obj/file_ops.o \
-			obj/log.o 
+			obj/log.o \
+			main_func.o
 CFLAGS := -I./inc/ -fms-extensions
 
 obj/main.o: main.c 
@@ -16,6 +17,8 @@ obj/file_ops.o: $(SRC_DIR)file_ops.c
 obj/log.o: $(SRC_DIR)log.c 
 	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
 
+obj/main_func.o: $(SRC_DIR)main_func.c 
+	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
 
 clean:
 	@rm -rf bin/* obj/* lib/shared/* lib/static/*
