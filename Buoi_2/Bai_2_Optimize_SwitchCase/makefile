@@ -18,3 +18,7 @@ $(BIN_DIR)/$(TARGET): $(OBJ_FILES)
 
 clean:
 	rm -f bin/* obj/*
+
+.PHONY: build clean
+
+build: all

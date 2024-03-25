@@ -6,9 +6,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdbool.h>
 #include "file_ops.h"
 #include "log.h"
 
+//Declare boolean variable to check whether file is allocated or not
+bool isFileAllocated = false;
 
 extern void SelectFile();
 extern void FreeFile();
@@ -36,11 +39,19 @@ int main(int argc, char *argv[])
         switch (option)
         {
             case 1:
-                //FreeFile(&file);
+                if (isFileAllocated)
+                {
+                    FreeFile(&file);
+                }
                 SelectFile(&file, bufsize);
+                isFileAllocated = true;
                 break;
             case 2:
-                FreeFile(&file);
+                if (isFileAllocated)
+                {
+                    FreeFile(&file);
+                    isFileAllocated = false;
+                }
                 break;
             case 3:
                 WriteDataToFile(&file, bufsize);
@@ -55,7 +66,11 @@ int main(int argc, char *argv[])
                 DeleteLineFromFile(&file);
                 break;
             case 7:
-                FreeFile(&file);
+                if (isFileAllocated)
+                {
+                    FreeFile(&file);
+                    isFileAllocated = false;
+                }
                 return 0;
                 break;
             default:
