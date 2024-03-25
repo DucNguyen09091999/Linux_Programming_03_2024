@@ -1,13 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include "file_ops.h"
-#include "log.h"
+#include "common.h"
+
+//Declare boolean variable to check whether file is allocated or not
+static bool isFileAllocated = false;
 
 void SelectFile(FileHandler *file, size_t bufsize)
 {
@@ -26,15 +20,19 @@ void SelectFile(FileHandler *file, size_t bufsize)
     if (file->filename[strlen(file->filename) - 1] == '\n') {
         file->filename[strlen(file->filename) - 1] = '\0';
     }
+    isFileAllocated = true;
 }
 
 void FreeFile(FileHandler *file)
 {
-    if (file->filename != NULL)
+    if (isFileAllocated)
     {
+
         free(file->filename);
         file->filename = NULL;
+        isFileAllocated = false;
     }
+
 }
 
 void WriteDataToFile(FileHandler *file, size_t bufsize)
