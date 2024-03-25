@@ -8,6 +8,19 @@ extern void GetCurrentOffsetOfFile();
 extern void DeleteLineFromFile();
 extern void Print_Menu();
 
+
+typedef void (*MenuFunction)(FileHandler *, size_t);
+
+MenuFunction menuFunctions[] = {
+    SelectFile,
+    FreeFile,
+    WriteDataToFile,
+    ReadDataFromFile,
+    GetCurrentOffsetOfFile,
+    DeleteLineFromFile,
+    FreeFile // Exit
+};
+
 int main(int argc, char *argv[])
 {
     (void)argc; // Lời ghi chú để loại bỏ cảnh báo "unused parameter"
@@ -23,33 +36,17 @@ int main(int argc, char *argv[])
     {
         printf("Please enter your choice: ");
         scanf("%d", &option);
-        switch (option)
-        {
-            case 1:
-                SelectFile(&file, bufsize);
-                break;
-            case 2:
-                FreeFile(&file);
-                break;
-            case 3:
-                WriteDataToFile(&file, bufsize);
-                break;
-            case 4:
-                ReadDataFromFile(&file);
-                break;
-            case 5:
-                GetCurrentOffsetOfFile(&file);
-                break;
-            case 6:
-                DeleteLineFromFile(&file);
-                break;
-            case 7:
-                FreeFile(&file);
-                return 0;
-                break;
-            default:
-                printf("Invalid option\n");
-                break;
+        
+        if (option < 1 || option > 7) {
+            printf("Invalid option\n");
+            continue;
+        }
+
+        // Gọi hàm tương ứng với option được chọn
+        menuFunctions[option - 1](&file, bufsize);
+
+        if (option == 7) {
+            break; // Thoát khỏi vòng lặp nếu option là Exit
         }
     }
     return 0;
