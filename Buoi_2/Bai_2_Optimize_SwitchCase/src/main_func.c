@@ -20,7 +20,32 @@ void SelectFile(FileHandler *file, size_t bufsize)
     if (file->filename[strlen(file->filename) - 1] == '\n') {
         file->filename[strlen(file->filename) - 1] = '\0';
     }
-    isFileAllocated = true;
+
+    if (access(file->filename, F_OK) == -1)
+    {
+        char choice;
+        printf("File is not exist.\nDo you want to create a new file? <y\\n>");
+        scanf("%c",&choice);
+
+        if (choice == 'y' || choice == 'Y')
+        {
+            file->fd = open(file->filename, O_RDWR | O_CREAT, 0666);
+            if (file->fd == -1)
+            {
+                perror("open");
+            }
+            printf("File created successfully\n");
+            isFileAllocated = true;
+        }
+        else if (choice == 'n' || choice == 'N')
+        {
+            printf("Rejected create file\n");
+        }
+        else
+        {
+            printf("Option is invalid. Only y\\n\n");
+        }
+    }
 }
 
 void FreeFile(FileHandler *file)
