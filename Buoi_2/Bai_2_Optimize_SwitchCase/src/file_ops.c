@@ -1,9 +1,4 @@
-#include "file_ops.h"
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "common.h"
 
 // Definition of the OpsType structure
 const struct OpsType File_Operations = {
@@ -111,8 +106,6 @@ void RemoveLine(FileHandler *file, const char *filename, int lineNumber)
 {
     char buffer[512];
     int currentLine = 0;
-    size_t bytesRead;
-    size_t bytesWritten;
 
     lseek(file->fd, 0, SEEK_SET);
 

@@ -20,18 +20,13 @@ extern void Print_Menu();
 
 int main(int argc, char *argv[])
 {
+    (void)argc; // Lời ghi chú để loại bỏ cảnh báo "unused parameter"
+    (void)argv; // Lời ghi chú để loại bỏ cảnh báo "unused parameter"
 
     FileHandler file;
-    status_t t_status;
-    off_t offset = 0;
     int option;
     size_t bufsize = 100;
-    size_t filesize;
-    int c;
-    char *dataFromUser = NULL;
-    size_t datasize;
 
-    int lineNumber;
 
     Print_Menu();
     while (1)

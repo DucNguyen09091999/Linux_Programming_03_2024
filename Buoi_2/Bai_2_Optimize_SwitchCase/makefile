@@ -1,32 +1,20 @@
-PROJ_NAME := list dir
-INC_DIR :=inc/
-SRC_DIR := src/
-CC := gcc
-OBJ_FILE := obj/main.o
-OBJ_FILE += obj/file_ops.o \
-			obj/log.o \
-			main_func.o
-CFLAGS := -I./inc/ -fms-extensions
+CC = gcc
+CFLAGS = -Wall -Wextra -I./inc/ -fms-extensions
+SRC_DIR = src
+OBJ_DIR = obj
+BIN_DIR = bin
 
-obj/main.o: main.c 
-	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
-	
-obj/file_ops.o: $(SRC_DIR)file_ops.c 
-	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
+SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
+SRC_FILES += main.c
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_FILES))
+TARGET = my_program
+all: $(BIN_DIR)/$(TARGET)
 
-obj/log.o: $(SRC_DIR)log.c 
-	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ -fPIC
 
-obj/main_func.o: $(SRC_DIR)main_func.c 
-	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
+$(BIN_DIR)/$(TARGET): $(OBJ_FILES)
+	$(CC) $(CFLAGS) $^ -o $@ -fPIC
 
 clean:
-	@rm -rf bin/* obj/* lib/shared/* lib/static/*
-	@echo "Delete all file"
-
-main_run:
-	@./bin/main
-
-build: $(OBJ_FILE)	
-	@$(CC) -o bin/main $^
-	@echo "Finished build process"
+	rm -f bin/* obj/*

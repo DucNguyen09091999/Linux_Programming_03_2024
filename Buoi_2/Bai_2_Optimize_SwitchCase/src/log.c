@@ -1,5 +1,4 @@
-#include "log.h"
-#include <stdio.h>
+#include "common.h"
 
 const struct LogType Log_Operation = {
     .pLog = LogOperation
