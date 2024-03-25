@@ -128,19 +128,41 @@ void DeleteLineFromFile(FileHandler *file)
 
 void Print_Menu()
 {
+{
+    const char *menuOptions[] = {
+        "Select a file",
+        "Free selected file",
+        "Write to file",
+        "Read from file",
+        "Get the current offset",
+        "Delete one line in file",
+        "Exit program"
+    };
+
+    const char *menuFeatures[] = {
+        "Select the file you want to work",
+        "Free file",
+        "Write data to file",
+        "Read data from file",
+        "Get the current offset",
+        "Delete assigned line in file",
+        "Exit program"
+    };
+
     printf("============================== Welcome to file operation ===============================\n");
     printf("========================================================================================\n");
     printf("============================== Please Enter your Option  ===============================\n");
     printf("==-------------- Option ------------------||--------------- Feature ------------------==\n");
     printf("========================================================================================\n");
-    printf("== 1. Select a file                       ||  Select the file you want to work        ==\n");
-    printf("== 2. Free selected file                  ||  free file                               ==\n");
-    printf("== 3. Write to file                       ||  Write data to file                      ==\n");
-    printf("== 4. Read from file                      ||  Read data from file                     ==\n");
-    printf("== 5. Get the current offset              ||  Get the current offset                  ==\n");
-    printf("== 6. Delte one line in file              ||  Delete assigned line in file            ==\n");
-    printf("== 7. Exit program                        ||  Exit program                            ==\n");
+
+    size_t numOptions = sizeof(menuOptions) / sizeof(menuOptions[0]); // Số lượng tùy chọn
+
+    for (size_t i = 0; i < numOptions; ++i) { // Sử dụng size_t thay cho int
+        printf("== %zu. %-36s||  %-40s==\n", i + 1, menuOptions[i], menuFeatures[i]);
+    }
+
     printf("========================================================================================\n");
     printf("========================================================================================\n");
+}
 
 }

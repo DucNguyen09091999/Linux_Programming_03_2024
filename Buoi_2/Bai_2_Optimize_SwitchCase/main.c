@@ -8,9 +8,11 @@ extern void GetCurrentOffsetOfFile();
 extern void DeleteLineFromFile();
 extern void Print_Menu();
 
-
+/*Define function pointer*/
 typedef void (*MenuFunction)(FileHandler *, size_t);
 
+
+/*Array to save the features*/
 MenuFunction menuFunctions[] = {
     SelectFile,
     FreeFile,
@@ -23,8 +25,8 @@ MenuFunction menuFunctions[] = {
 
 int main(int argc, char *argv[])
 {
-    (void)argc; // Lời ghi chú để loại bỏ cảnh báo "unused parameter"
-    (void)argv; // Lời ghi chú để loại bỏ cảnh báo "unused parameter"
+    (void)argc; // Remove warning "unused parameter"
+    (void)argv; // Remove warning "unused parameter"
 
     FileHandler file;
     int option;
@@ -36,17 +38,17 @@ int main(int argc, char *argv[])
     {
         printf("Please enter your choice: ");
         scanf("%d", &option);
-        
+
         if (option < 1 || option > 7) {
             printf("Invalid option\n");
             continue;
         }
 
-        // Gọi hàm tương ứng với option được chọn
+        // Call the corresponding features
         menuFunctions[option - 1](&file, bufsize);
 
         if (option == 7) {
-            break; // Thoát khỏi vòng lặp nếu option là Exit
+            break; // if option is equal to 7, exit program
         }
     }
     return 0;
