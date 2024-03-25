@@ -19,15 +19,18 @@ typedef struct
 
 // Forward declaration of the OpsType structure
 struct OpsType;
-
+struct LogType;
 struct OpsType {
     status_t (*pOpenFile)(FileHandler *file, const int mode);
     status_t (*pCloseFile)(FileHandler *file);
     status_t (*pReadFile)(FileHandler *file);
     status_t (*pWriteFile)(FileHandler *file, const char *content);
-    status_t (*pLog)( const char *operation, status_t t_status);
     off_t (*pGetCurrentOffset)(FileHandler *file);
     status_t (*pRemoveOneLine)(FileHandler *file, const char *filename, int lineNumber);
+};
+
+struct LogType {
+    status_t (*pLog)( const char *operation, status_t t_status);
 };
 
 // Function prototypes
@@ -35,12 +38,13 @@ status_t OpenFile(FileHandler *file, const int mode);
 status_t CloseFile(FileHandler *file);
 status_t WriteToFile(FileHandler *file, const char *content);
 status_t ReadFromFile(FileHandler *file);
-int LineExists(FileHandler *file, int line_number);
-void RemoveLine(FileHandler *file, const char *filename, int lineNumber);
 status_t RemoveOneLineInFile(FileHandler *file, const char *filename, int lineNumber);
 status_t LogOperation(const char *operation, status_t t_status);
 off_t GetCurrentOffset(FileHandler *file);
 
+const struct LogType Log_Operation = {
+    .pLog = LogOperation
+};
 
 // Definition of the OpsType structure
 const struct OpsType File_Operations = {
@@ -49,7 +53,6 @@ const struct OpsType File_Operations = {
     .pReadFile = ReadFromFile,
     .pWriteFile = WriteToFile,
     .pGetCurrentOffset = GetCurrentOffset,
-    .pLog = LogOperation,
     .pRemoveOneLine = RemoveOneLineInFile,
 };
 
@@ -139,11 +142,9 @@ int LineExists(FileHandler *file, int line_number) {
 
         // Nếu chúng ta đến dòng chúng ta quan tâm, đóng tệp và trả về 1
         if (currentLine == line_number) {
-            printf("OK: Tong so dong la %d\n", currentLine);
             return 1; // Dòng tồn tại
         }
-    }
-    printf("Fail: Tong so dong la %d\n", currentLine);    
+    }   
     return 0;
 }
 
@@ -284,23 +285,23 @@ void WriteDataToFile(FileHandler *file, size_t bufsize)
         dataFromUser[strlen(dataFromUser) - 1] = '\0';
     }
     t_status = File_Operations.pOpenFile(file, 0666);
-    File_Operations.pLog("Open", t_status);
+    Log_Operation.pLog("Open", t_status);
     t_status = File_Operations.pWriteFile(file, dataFromUser);
-    File_Operations.pLog("Write", t_status);
+    Log_Operation.pLog("Write", t_status);
     free(dataFromUser);
     t_status = File_Operations.pCloseFile(file);
-    File_Operations.pLog("Close", t_status);
+    Log_Operation.pLog("Close", t_status);
 }
 
 void ReadDataFromFile(FileHandler *file)
 {
     status_t t_status;
     t_status = File_Operations.pOpenFile(file, 0666);
-    File_Operations.pLog("Open", t_status);
+    Log_Operation.pLog("Open", t_status);
     t_status = File_Operations.pReadFile(file);
-    File_Operations.pLog("Read", t_status);
+    Log_Operation.pLog("Read", t_status);
     t_status = File_Operations.pCloseFile(file);
-    File_Operations.pLog("Close", t_status);
+    Log_Operation.pLog("Close", t_status);
 }
 
 void GetCurrentOffsetOfFile(FileHandler *file)
@@ -308,11 +309,11 @@ void GetCurrentOffsetOfFile(FileHandler *file)
     status_t t_status;
     off_t offset;
     t_status = File_Operations.pOpenFile(file, 0666);
-    File_Operations.pLog("Open", t_status);
+    Log_Operation.pLog("Open", t_status);
     offset = File_Operations.pGetCurrentOffset(file);
     printf("Current offset is %ld\n", offset);
     t_status = File_Operations.pCloseFile(file);
-    File_Operations.pLog("Close", t_status);
+    Log_Operation.pLog("Close", t_status);
 }
 
 void DeleteLineFromFile(FileHandler *file)
@@ -320,14 +321,14 @@ void DeleteLineFromFile(FileHandler *file)
     status_t t_status;
     int lineNumber;
     t_status = File_Operations.pOpenFile(file, 0666);
-    File_Operations.pLog("Open", t_status);
+    Log_Operation.pLog("Open", t_status);
     printf("Please enter the line number you want to delete: ");
     scanf("%d", &lineNumber);
     while (getchar() != '\n'); // Clear input buffer
     t_status = File_Operations.pRemoveOneLine(file, file->filename, lineNumber);
-    File_Operations.pLog("Remove a line in file ", t_status);
+    Log_Operation.pLog("Remove a line in file ", t_status);
     t_status = File_Operations.pOpenFile(file, 0666);
-    File_Operations.pLog("Open", t_status);
+    Log_Operation.pLog("Open", t_status);
 }
 
 
