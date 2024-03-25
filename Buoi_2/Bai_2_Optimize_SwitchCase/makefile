@@ -1,7 +1,29 @@
-.PHONY: build clean debug
-build:
-	gcc -o RW_Ops RW_Ops.c -lc
-debug:
-	gcc -o RW_Ops -g RW_Ops.c
+PROJ_NAME := list dir
+INC_DIR :=inc/
+SRC_DIR := src/
+CC := gcc
+OBJ_FILE := obj/main.o
+OBJ_FILE += obj/file_ops.o \
+			obj/log.o 
+CFLAGS := -I./inc/ -fms-extensions
+
+obj/main.o: main.c 
+	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
+	
+obj/file_ops.o: $(SRC_DIR)file_ops.c 
+	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
+
+obj/log.o: $(SRC_DIR)log.c 
+	@$(CC) -c $(CFLAGS) $^ -o $@ -fPIC
+
+
 clean:
-	rm -rf RW_Ops
+	@rm -rf bin/* obj/* lib/shared/* lib/static/*
+	@echo "Delete all file"
+
+main_run:
+	@./bin/main
+
+build: $(OBJ_FILE)	
+	@$(CC) -o bin/main $^
+	@echo "Finished build process"
