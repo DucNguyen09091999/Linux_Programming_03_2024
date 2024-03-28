@@ -61,6 +61,7 @@ void FreeFile(FileHandler *file)
         free(file->filename);
         file->filename = NULL;
         isFileAllocated = false;
+        printf("File is freed\n");
     }
     else
     {
