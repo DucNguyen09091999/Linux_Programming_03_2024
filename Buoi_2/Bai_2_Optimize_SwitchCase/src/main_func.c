@@ -46,6 +46,11 @@ void SelectFile(FileHandler *file, size_t bufsize)
             printf("Option is invalid. Only y\\n\n");
         }
     }
+    else
+    {
+        printf("Allocate file successfully\n");
+        isFileAllocated = true;
+    }
 }
 
 void FreeFile(FileHandler *file)
@@ -57,6 +62,10 @@ void FreeFile(FileHandler *file)
         file->filename = NULL;
         isFileAllocated = false;
     }
+    else
+    {
+        printf("File is not currently use. Please allocate file first\n");
+    }
 
 }
 
@@ -64,65 +73,97 @@ void WriteDataToFile(FileHandler *file, size_t bufsize)
 {
     status_t t_status;
     char *dataFromUser = NULL;
-    dataFromUser = (char *)malloc(bufsize * sizeof(char));
-    if (dataFromUser == NULL)
+    
+    if (isFileAllocated)
     {
-        fprintf(stderr, "Memory allocation error\n");
-        exit(EXIT_FAILURE);
+        dataFromUser = (char *)malloc(bufsize * sizeof(char));
+        if (dataFromUser == NULL)
+        {
+            fprintf(stderr, "Memory allocation error\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("Please enter data to write to file: ");
+        int c;
+        // Clear the input buffer
+        while ((c = getchar()) != '\n' && c != EOF);
+        getline(&dataFromUser, &bufsize, stdin);
+        if (dataFromUser[strlen(dataFromUser) - 1] == '\n') {
+            dataFromUser[strlen(dataFromUser) - 1] = '\0';
+        }
+        t_status = File_Operations.pOpenFile(file, 0666);
+        Log_Operation.pLog("Open", t_status);
+        t_status = File_Operations.pWriteFile(file, dataFromUser);
+        Log_Operation.pLog("Write", t_status);
+        free(dataFromUser);
+        t_status = File_Operations.pCloseFile(file);
+        Log_Operation.pLog("Close", t_status);
     }
-    printf("Please enter data to write to file: ");
-    int c;
-    // Clear the input buffer
-    while ((c = getchar()) != '\n' && c != EOF);
-    getline(&dataFromUser, &bufsize, stdin);
-    if (dataFromUser[strlen(dataFromUser) - 1] == '\n') {
-        dataFromUser[strlen(dataFromUser) - 1] = '\0';
+    else
+    {
+        printf("Please select a file to write first\n");
     }
-    t_status = File_Operations.pOpenFile(file, 0666);
-    Log_Operation.pLog("Open", t_status);
-    t_status = File_Operations.pWriteFile(file, dataFromUser);
-    Log_Operation.pLog("Write", t_status);
-    free(dataFromUser);
-    t_status = File_Operations.pCloseFile(file);
-    Log_Operation.pLog("Close", t_status);
+
+
 }
 
 void ReadDataFromFile(FileHandler *file)
 {
     status_t t_status;
-    t_status = File_Operations.pOpenFile(file, 0666);
-    Log_Operation.pLog("Open", t_status);
-    t_status = File_Operations.pReadFile(file);
-    Log_Operation.pLog("Read", t_status);
-    t_status = File_Operations.pCloseFile(file);
-    Log_Operation.pLog("Close", t_status);
+
+    if (isFileAllocated)
+    {
+        t_status = File_Operations.pOpenFile(file, 0666);
+        Log_Operation.pLog("Open", t_status);
+        t_status = File_Operations.pReadFile(file);
+        Log_Operation.pLog("Read", t_status);
+        t_status = File_Operations.pCloseFile(file);
+        Log_Operation.pLog("Close", t_status);
+    }
+    else
+    {
+        printf("Please select a file to read first\n");
+    }
 }
 
 void GetCurrentOffsetOfFile(FileHandler *file)
 {
     status_t t_status;
     off_t offset;
-    t_status = File_Operations.pOpenFile(file, 0666);
-    Log_Operation.pLog("Open", t_status);
-    offset = File_Operations.pGetCurrentOffset(file);
-    printf("Current offset is %ld\n", offset);
-    t_status = File_Operations.pCloseFile(file);
-    Log_Operation.pLog("Close", t_status);
+    if (isFileAllocated)
+    {
+        t_status = File_Operations.pOpenFile(file, 0666);
+        Log_Operation.pLog("Open", t_status);
+        offset = File_Operations.pGetCurrentOffset(file);
+        printf("Current offset is %ld\n", offset);
+        t_status = File_Operations.pCloseFile(file);
+        Log_Operation.pLog("Close", t_status);
+    }
+    else
+    {
+        printf("Please select a file to seek first\n");
+    }
 }
 
 void DeleteLineFromFile(FileHandler *file)
 {
     status_t t_status;
     int lineNumber;
+    if (isFileAllocated)
+    {
     t_status = File_Operations.pOpenFile(file, 0666);
     Log_Operation.pLog("Open", t_status);
     printf("Please enter the line number you want to delete: ");
     scanf("%d", &lineNumber);
     while (getchar() != '\n'); // Clear input buffer
-    t_status = File_Operations.pRemoveOneLine(file, file->filename, lineNumber);
+    t_status = File_Operations.pRemoveOneLine(file, lineNumber);
     Log_Operation.pLog("Remove a line in file ", t_status);
     t_status = File_Operations.pOpenFile(file, 0666);
     Log_Operation.pLog("Open", t_status);
+    }
+    else
+    {
+        printf("Please select a file to delete line first\n");
+    }
 }
 
 

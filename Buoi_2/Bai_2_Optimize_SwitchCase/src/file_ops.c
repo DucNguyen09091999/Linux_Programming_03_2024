@@ -10,10 +10,19 @@ const struct OpsType File_Operations = {
     .pRemoveOneLine = RemoveOneLineInFile,
 };
 
+
+/*
+ * @brief                               Open file 
+ * @param[in]               file        struct of file
+ * @param[in]               mode        Mode of creating file
+ * @param[out]              None
+ * @return                  status_t    status
+ */
 status_t OpenFile(FileHandler *file, const int mode)
 {
+    /*Check if the file is existed or not*/
     if (access(file->filename, F_OK) == -1) {
-        // If file is not exist, create a file
+        /*If file is not exist, create a file*/ 
         file->fd = open(file->filename, O_RDWR | O_CREAT, mode);
         if (file->fd == -1)
         {
@@ -23,7 +32,7 @@ status_t OpenFile(FileHandler *file, const int mode)
     }
     else
     {
-        // If file is existed, open file
+        /*If file is existed, open file*/ 
         file->fd = open(file->filename, O_RDWR, mode);
         if (file->fd == -1) {
             perror("open");
@@ -33,12 +42,26 @@ status_t OpenFile(FileHandler *file, const int mode)
     return E_SUCCESS;
 }
 
+/*
+ * @brief                               close file 
+ * @param[in]               file        struct of file
+ * @param[out]              None
+ * @return                  status_t    status
+ */
 status_t CloseFile(FileHandler *file)
 {
     close(file->fd);
     return E_SUCCESS;
 }
 
+
+/*
+ * @brief                               Write data to file
+ * @param[in]               file        struct of file
+ * @param[in]               content     Content import to file
+ * @param[out]              None
+ * @return                  status_t    status
+ */
 status_t WriteToFile(FileHandler *file, const char *content)
 {
     ssize_t WriteNum;
@@ -50,6 +73,7 @@ status_t WriteToFile(FileHandler *file, const char *content)
         perror("lseek");
         return E_FAILED;
     } 
+    /*Write data to file*/
     WriteNum = write(file->fd, content, strlen(content));
     if (WriteNum < 0)
     {
@@ -59,6 +83,13 @@ status_t WriteToFile(FileHandler *file, const char *content)
     return E_SUCCESS; 
 }
 
+
+/*
+ * @brief                               Read data from file 
+ * @param[in]               file        struct of file
+ * @param[out]              None
+ * @return                  status_t    status
+ */
 status_t ReadFromFile(FileHandler *file)
 {
     ssize_t ReadNum;
@@ -71,6 +102,7 @@ status_t ReadFromFile(FileHandler *file)
         perror("lseek");
         return E_FAILED;
     }
+    /*Read data from file*/
     ReadNum = read(file->fd, buffer, sizeof(buffer));
     if (ReadNum <= 0)
     {
@@ -82,27 +114,42 @@ status_t ReadFromFile(FileHandler *file)
     return E_SUCCESS;
 }
 
-// Check the line is exist or not
+/*
+ * @brief                                   Check the line is exist or not
+ * @param[in]               file            struct of file
+ * @param[in]               line_number     line number within a file
+ * @param[out]              None
+ * @return                  status_t    status
+ */
 int LineExists(FileHandler *file, int line_number) {
     char ch;
     int currentLine = 0;
     lseek(file->fd, 0, SEEK_SET);
-    // Đọc từng ký tự trong tệp
+    /* Read each characteristic in file*/
     while ((read(file->fd, &ch, 1)) != 0) {
-        // Nếu gặp ký tự kết thúc dòng, tăng biến đếm dòng
+        /*When reach the EOF, increase curentline*/
         if (ch == '\n') {
             currentLine++;
         }
 
-        // Nếu chúng ta đến dòng chúng ta quan tâm, đóng tệp và trả về 1
+        /*when matched with expected line, close file and return*/
         if (currentLine == line_number) {
-            return 1; // Dòng tồn tại
+            return 1; /*Line existed*/
         }
     }   
     return 0;
+     /*Line is not exist*/
 }
 
-void RemoveLine(FileHandler *file, const char *filename, int lineNumber)
+
+/*
+ * @brief                                   Remove a line in file
+ * @param[in]               file            struct of file
+ * @param[in]               line_number     line number within a file
+ * @param[out]              None
+ * @return                  status_t    status
+ */
+void RemoveLine(FileHandler *file, int lineNumber)
 {
     char buffer[512];
     int currentLine = 0;
@@ -145,19 +192,19 @@ void RemoveLine(FileHandler *file, const char *filename, int lineNumber)
     close(temp_fd);
 
     // Xóa tệp gốc và đổi tên tệp tạm thời thành tên của tệp gốc
-    if (remove(filename) != 0) {
+    if (remove(file->filename) != 0) {
         perror("remove");
         return;
     }
 
-    if (rename("temp.txt", filename) != 0) {
+    if (rename("temp.txt", file->filename) != 0) {
         perror("rename");
         return;
     }
 
 }
 
-status_t RemoveOneLineInFile(FileHandler *file, const char *filename, int lineNumber)
+status_t RemoveOneLineInFile(FileHandler *file, int lineNumber)
 {
     // Check whether the line is existed in file or not
     if (!LineExists(file, lineNumber)) {
@@ -165,7 +212,7 @@ status_t RemoveOneLineInFile(FileHandler *file, const char *filename, int lineNu
         return E_FAILED;
     }
     // printf("Line %d exist.\n", lineNumber);
-    RemoveLine(file, filename, lineNumber);
+    RemoveLine(file, lineNumber);
     return E_SUCCESS;    
 }
 

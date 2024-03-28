@@ -25,8 +25,8 @@ MenuFunction menuFunctions[] = {
 
 int main(int argc, char *argv[])
 {
-    (void)argc; // Remove warning "unused parameter"
-    (void)argv; // Remove warning "unused parameter"
+    (void)argc;
+    (void)argv;
 
     FileHandler file;
     int option;
