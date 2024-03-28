@@ -13,5 +13,6 @@
 #include "file_ops.h"
 #include "log.h"
 
-
+#define E_SUCCESS   0
+#define E_FAILED    -1
 #endif
